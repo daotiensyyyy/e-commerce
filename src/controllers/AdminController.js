@@ -107,12 +107,12 @@ class AdminController {
     }
 
     //[POST] /admin/api/create-product
-    createProduct = async (req, res, next) => {
+    createProduct = async (req, res) => {
         try {
             await upload(req, res);
 
             if (req.file == undefined) {
-                return res.status(400).send({ message: "Choose a file to upload" });
+                return res.status(400).send({ message: "Error" });
             }
             const product = new Product({
                 name: req.body.name,
