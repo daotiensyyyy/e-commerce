@@ -22,21 +22,21 @@ const Order = new Schema({
     code: {
         type: String,
     },
-    billingAddress: {
-        customerName: {
-            type: String,
-        },
-        customerEmail: {
-            type: String,
 
-        },
-        customerAddress: {
-            type: String,
-        },
-        customerPhone: {
-            type: String,
-        }
+    customerName: {
+        type: String,
     },
+    customerEmail: {
+        type: String,
+
+    },
+    customerAddress: {
+        type: String,
+    },
+    customerPhone: {
+        type: String,
+    },
+
     shippingMethod: {
         type: String,
     },

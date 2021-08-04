@@ -12,7 +12,11 @@ class OrderController {
         }
         const orderData = {
             code: req.body.code,
-            billingAddress: req.body.billingAddress,
+            customerName: req.body.customerName,
+            customerEmail: req.body.customerEmail,
+            customerAddress: req.body.customerAddress,
+            customerPhone: req.body.customerPhone,
+            // billingAddress: req.body.billingAddress,
             shippingMethod: req.body.shippingMethod,
             paymentMethod: req.body.paymentMethod
         };
