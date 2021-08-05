@@ -6,6 +6,7 @@ const User = db.user;
 const Role = db.role;
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const Category = require("../models/Category");
 
 const Product = db.product;
 
@@ -153,9 +154,23 @@ class SiteController {
             });
     }
 
+    //[GET] /api/all-categories
+    getAllCategories = (req, res) => {
+        Category.find().lean()
+            .then(categories => {
+                if (!categories) {
+                    return res.status(404).send('No data');
+                }
+                res.status(200).json(categories);
+            })
+            .catch(err => {
+                return res.status(500).send(err.message);
+            });
+    }
+
     //[GET] /api/category/:id/product
     getProductFilteredByCategory = (req, res) => {
-        Product.find({ categories: req.params.id }).lean().populate("categories", "-__v")
+        Product.find({ categories: req.params.id, deleted: false }).lean().populate("categories", "-__v")
             .then(product => {
                 if (!product) {
                     return res.status(404).send('Product not found');
