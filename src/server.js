@@ -30,4 +30,4 @@ app.use('/uploads', express.static('./uploads'));
 
 
 route(app);
-app.listen(port, () => console.log(`Running on port ${port}`));
+app.listen(process.env.PORT || 3000);
