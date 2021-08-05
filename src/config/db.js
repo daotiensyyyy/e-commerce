@@ -4,7 +4,7 @@ const Role = db.role;
 
 async function connect() {
     try {
-        await mongoose.connect('mongodb://localhost:27017/nodejs-restful-api', {
+        await mongoose.connect('mongodb+srv://dbUser:123456zxc@cluster0.jwawn.mongodb.net/nodejs-restful-api?retryWrites=true&w=majority', {
             useNewUrlParser: true,
             useUnifiedTopology: true,
             useFindAndModify: false,
