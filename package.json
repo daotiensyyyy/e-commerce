@@ -1,9 +1,9 @@
 {
   "name": "test-auth-nodejs",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "nodemon src/server.js"
+    "start": "node src/server.js"
   },
   "license": "MIT",
   "dependencies": {
