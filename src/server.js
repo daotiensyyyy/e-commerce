@@ -21,7 +21,7 @@ db.initial();
 // });
 
 app.use(cors({
-    origin: 'https://t-92.vercel.app/login',
+    origin: 'https://t-92.vercel.app',
     credentials: true //Để bật cookie HTTP qua CORS
 }));
 
