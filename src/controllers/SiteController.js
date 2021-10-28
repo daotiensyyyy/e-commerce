@@ -1,14 +1,14 @@
 // This file contains controllers that can be used by user, admin, moderator,....
-
+require('dotenv').config();
 const config = require("../config/auth");
 const db = require("../models");
 const User = db.user;
 const Role = db.role;
+const Product = db.product;
+const Category = db.category;
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const Category = require("../models/Category");
 
-const Product = db.product;
 
 class SiteController {
 
@@ -16,7 +16,7 @@ class SiteController {
     signup = (req, res) => {
         const user = new User({
             username: req.body.username,
-            email: req.body.email,
+            // email: req.body.email,
             password: bcrypt.hashSync(req.body.password, 8)
         });
 
@@ -85,43 +85,50 @@ class SiteController {
                     return res.status(404).send({ message: "User Not found." });
                 }
 
-                var passwordIsValid = bcrypt.compareSync(
+                let passwordIsValid = bcrypt.compareSync(
                     req.body.password,
                     user.password
                 );
 
-                if (!passwordIsValid) {
-                    return res.status(401).send({
-                        accessToken: null,
-                        message: "Invalid Password!"
-                    });
-                }
 
-                var token = jwt.sign({ id: user.id }, config.secret, {
-                    expiresIn: 86400 // 24 hours
+                let token = jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN_SECRET, {
+                    expiresIn: '1h'
                 });
 
-                var authorities = [];
+                let authorities = [];
 
                 for (let i = 0; i < user.roles.length; i++) {
                     authorities.push("ROLE_" + user.roles[i].name.toUpperCase());
                 }
-                res.status(200).send({
-                    id: user._id,
-                    username: user.username,
-                    email: user.email,
-                    roles: authorities,
-                    accessToken: token
-                });
+
+                if (!passwordIsValid) {
+                    res.sendStatus(401);
+                } else {
+                    res.status(200)
+                        .cookie('access_token', token, {
+                            maxAge: 365 * 24 * 60 * 60 * 100,
+                            httpOnly: true,
+                            // secure: true;
+                        })
+                        .send({
+                            id: user._id,
+                            username: user.username,
+                            email: user.email,
+                            roles: authorities,
+                            accessToken: token,
+                            isSuccess: 1,
+                            status: 200,
+                        });
+                }
             });
     };
 
     //[POST] /api/signout
-    signout = (req, res) => {
-
+    signOut = (req, res) => {
+        res
+            .status(202)
+            .clearCookie('access_token').send("Logged out!")
     }
-
-    // User GUEST
 
     //[GET] /api/all-products
     getAllProducts = (req, res) => {
@@ -142,13 +149,30 @@ class SiteController {
         Product.findById({ _id: req.params.id, deleted: false }).lean().populate("categories", "-__v")
             .then(product => {
                 if (!product) {
-                    return res.status(404).send('Product not found');
+                    return res.status(404).send('product not found');
                 }
                 res.status(200).json(product);
             })
             .catch(err => {
                 if (err.kind == 'ObjectId') {
-                    return res.status(404).send('Product not found');
+                    return res.status(404).send('product not found');
+                }
+                return res.status(404).send(err.message);
+            });
+    }
+
+    //[GET] /api/product/:slug
+    getProductBySlug = (req, res) => {
+        Product.findOne({ slug: req.params.slug, deleted: false }).lean().populate("categories", "-__v")
+            .then(product => {
+                if (!product) {
+                    return res.status(404).send('product not found');
+                }
+                res.status(200).json(product);
+            })
+            .catch(err => {
+                if (err.kind == 'ObjectId') {
+                    return res.status(404).send('product not found');
                 }
                 return res.status(404).send(err.message);
             });

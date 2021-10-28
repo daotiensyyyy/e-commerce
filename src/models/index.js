@@ -9,9 +9,8 @@ db.user = require("./User");
 db.role = require("./Role");
 db.product = require("./Product");
 db.category = require("./Category");
-db.cart = require("./Cart");
 db.order = require("./Order");
 
-db.ROLES = ["member", "admin", "moderator", "seller", "guest"];
+db.ROLES = ["admin"];
 
 module.exports = db;

@@ -1,93 +1,33 @@
-const db = require("../models");
-const fs = require('fs');
-const Category = require("../models/Category");
-const Product = require("../models/Product");
-const User = db.user;
-const upload = require("../middleware/fileUpload");
+const db = require('../models');
+const jwt = require('jsonwebtoken')
+// const fs = require('fs');
+const Product = db.product;
+const Category = db.category;
+// const User = db.user;
+const upload = require('../middleware/fileUpload');
+require('dotenv').config();
 
 class AdminController {
 
-    /* USER */
-
-    //[DELETE] /admin/api/user/:id
-    delete = (req, res) => {
-        User.delete({ _id: req.params.id })
-            .then(() => res.json().status(200))
-            .catch(err => {
-                res.status(500).json({
-                    message: err.message || "Some error occurred!"
-                });
-            });
-    }
-
-    //[PUT] /admin/api/user/:id/edit
-    editUserById = (req, res) => {
-        User.updateOne({ _id: req.params.id }, req.body)
-            .then((user) => {
-                if (!user) {
-                    return res.status(404).send({
-                        message: "User not found with!"
-                    });
-                }
-                res.json(user);
-            })
-            .catch(err => {
-                if (err.kind === 'ObjectId') {
-                    return res.status(404).send({
-                        message: "User not found!"
-                    });
-                }
-                return res.status(500).send({
-                    message: "Error updating user"
-                });
-            });
-    }
-
-    //[GET] /admin/api/user/:id
-    getUserInfoById = (req, res) => {
-        User.findById({ _id: req.params.id }).lean().populate("roles", "-__v")
-            .then((user) => {
-                if (!user) {
-                    return res.status(404).json({
-                        message: "user not found!"
-                    });
-                }
-                res.json(user);
-            }).catch(err => {
-                if (err.kind === 'ObjectId') {
-                    return res.status(404).send({
-                        message: "User not found!"
-                    });
-                }
-                return res.status(500).send({
-                    message: "Error retrieving user!"
-                });
-            });
-    };
-
-    //[GET] /admin/api/all-users
-    getAllUsers = (req, res) => {
-        User.find({}).lean().populate("roles", "-__v")
-            .then((data) => res.json(data))
-            .catch(err => {
-                res.status(500).json({
-                    message: err.message || "Some error occurred!"
-                });
-            });
-    };
-
-    //[GET] /admin/api/all-products
+    //[GET] /api/admin/all-products
     getAllProducts = (req, res) => {
-        Product.find({ deleted: false }).lean().populate("categories", "-__v")
-            .then(data => {
-                res.json(data);
-            })
-            .catch((err) => {
-                res.status(500).send({ message: err.message });
-            });
+        const token = req.cookies.access_token;
+        try {
+            const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+            Product.find({ deleted: false }).lean().populate("categories", "-__v")
+                .then(data => {
+                    res.json(data);
+                })
+                .catch((err) => {
+                    res.status(500).send({ message: err.message });
+                });
+        } catch (error) {
+            res.status(400)
+            throw error;
+        }
     }
 
-    //[GET] /admin/api/product/:id
+    //[GET] /api/admin/product/:id
     getProductById = (req, res) => {
         Product.findById({ _id: req.params.id }).lean().populate("categories", "-__v")
             .then(product => {
@@ -106,13 +46,16 @@ class AdminController {
             });
     }
 
-    //[POST] /admin/api/create-product
+    //[POST] /api/admin/create-product
     createProduct = async (req, res) => {
+        const token = req.cookies.access_token;
+
         try {
+            const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
             await upload(req, res);
 
             if (req.file == undefined) {
-                return res.status(400).send({ message: "Error" });
+                return res.status(400).send({ message: "File error" });
             }
             const product = new Product({
                 name: req.body.name,
@@ -120,7 +63,7 @@ class AdminController {
                 description: req.body.description,
                 image: req.file.path,
             });
-            product.save((err, product) => {
+            product.save((err) => {
                 if (err) {
                     res.status(500).send({ message: err });
                     return;
@@ -150,13 +93,11 @@ class AdminController {
             });
         } catch (err) {
             console.log(err);
-
             if (err.code == "LIMIT_FILE_SIZE") {
                 return res.status(500).send({
                     message: "File size should be less than 5MB",
                 });
             }
-
             res.status(500).send({
                 message: `Error occured: ${err}`,
             });
@@ -165,33 +106,7 @@ class AdminController {
 
     }
 
-    uploadFile = async (req, res) => {
-        try {
-            await upload(req, res);
-
-            if (req.file == undefined) {
-                return res.status(400).send({ message: "Choose a file to upload" });
-            }
-
-            res.status(200).json({
-                fileUrl: 'http://localhost:3000/images/' + req.file.filename
-            });
-        } catch (err) {
-            console.log(err);
-
-            if (err.code == "LIMIT_FILE_SIZE") {
-                return res.status(500).send({
-                    message: "File size should be less than 5MB",
-                });
-            }
-
-            res.status(500).send({
-                message: `Error occured: ${err}`,
-            });
-        }
-    };
-
-    //[PUT] /admin/api/product/:id/edit
+    //[PUT] /api/admin/product/:id/edit
     editProductById = (req, res) => {
         Product.updateOne({ _id: req.params.id }, req.body)
             .then(product => {
@@ -202,7 +117,6 @@ class AdminController {
                     .then(result => {
                         res.status(200).send(result);
                     })
-                // res.status(200).json(product);
             })
             .catch(err => {
                 if (err.kind == 'ObjectId') {
@@ -212,26 +126,33 @@ class AdminController {
             })
     }
 
-    //[DELETE] /admin/api/product/:id/delete
+    //[DELETE] /api/admin/product/:id/delete
     deleteProductById = (req, res) => {
-        Product.delete({ _id: req.params.id })
-            .then((data) => {
-                Product.findById({ _id: req.params.id }).lean()
-                    .then(product => {
-                        return res.status(200).json(product);
-                    })
-            })
-            .catch(err => {
-                if (err.kind == 'ObjectId') {
-                    return res.status(500).send({ message: 'Product not found' });
-                }
-                return res.status(500).send({ message: 'Error' });
+        const token = req.cookies.access_token;
+        try {
+            const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+
+            Product.findByIdAndDelete({ _id: req.params.id })
+                .then((product) => {
+                    return res.status(200).json(product);
+                })
+                .catch(err => {
+                    if (err.kind == 'ObjectId') {
+                        return res.status(500).send({ message: 'Product not found' });
+                    }
+                    return res.status(500).send({ message: 'Error' });
+                });
+        } catch (err) {
+            console.log(err);
+            res.status(500).send({
+                message: `Error occured: ${err}`,
             });
+        }
     }
 
-    //[GET] /admin/api/trash/products
+    //[GET] /api/admin/trash/products
     getProductsDeleted = (req, res) => {
-        Product.find({ deleted: true }).lean().populate("categories", "-__v")
+        Product.find({ deleted: true }).lean()
             .then((products) => {
                 if (!products) {
                     return res.status(404).send({ message: 'No products found' });
@@ -243,7 +164,7 @@ class AdminController {
             });
     }
 
-    //[PATCH] /admin/api/trash/product/:id/restore
+    //[PATCH] /api/admin/trash/product/:id/restore
     restoreProductById = (req, res) => {
         Product.restore({ _id: req.params.id })
             .then(() => {
@@ -260,28 +181,32 @@ class AdminController {
             });
     }
 
-    getFilesList = (req, res) => {
-        const path = "http://localhost:3000/images/";
+    //[POST] /api/admin/create-category
+    createCategory = (req, res) => {
+        const token = req.cookies.access_token;
 
-        fs.readdir(path, function (err, files) {
-            if (err) {
-                // res.status(500).send({
-                //     message: 'File not found',
-                // });
-                console.error(err);
-            }
+        try {
+            const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
-            let filesList = [];
-
-            files.forEach((file) => {
-                filesList.push({
-                    name: file,
-                    url: URL + file,
-                });
+            const category = new Category({
+                name: req.body.name,
+                description: req.body.description,
             });
+            category.save((err, data) => {
+                if (err) {
+                    res.status(500).send({ message: err });
+                    return;
+                }
+                res.json(data);
+            });
+        } catch (err) {
+            console.log(err);
+            res.status(500).send({
+                message: `Error occured: ${err}`,
+            });
+        }
 
-            res.status(200).send(filesList);
-        });
+
     }
 }
 

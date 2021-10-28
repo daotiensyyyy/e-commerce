@@ -15,21 +15,31 @@ const OrderItem = new Schema({
     price: {
         type: Number,
         min: [0, 'Price can not be less then 0.']
-    }
+    },
+    ice: {
+        type: String,
+    },
+    sugar: {
+        type: String,
+    },
+    toppings: {
+        type: String,
+    },
+
 });
 
 const Order = new Schema({
-    code: {
-        type: String,
-    },
+    // code: {
+    //     type: String,
+    // },
 
     customerName: {
         type: String,
     },
-    customerEmail: {
-        type: String,
+    // customerEmail: {
+    //     type: String,
 
-    },
+    // },
     customerAddress: {
         type: String,
     },
@@ -37,9 +47,9 @@ const Order = new Schema({
         type: String,
     },
 
-    shippingMethod: {
-        type: String,
-    },
+    // shippingMethod: {
+    //     type: String,
+    // },
     paymentMethod: {
         type: String,
         default: '"cash_on_delivery"'

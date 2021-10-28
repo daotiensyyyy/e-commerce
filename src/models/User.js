@@ -3,11 +3,10 @@ const mongooseDelete = require('mongoose-delete');
 
 const Schema = mongoose.Schema;
 
-/* MEMBER */
 
 const User = new Schema({
     username: String,
-    email: String,
+    // email: String,
     password: String,
     roles: [
         {

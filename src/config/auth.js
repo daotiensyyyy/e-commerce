@@ -1,3 +1,3 @@
 module.exports = {
-    secret: "bezkoder-secret-key"
+    secret: "1992-tea-shop-secret-key-dts"
 };

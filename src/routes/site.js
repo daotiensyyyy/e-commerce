@@ -5,24 +5,26 @@ const { verifySignUp } = require("../middleware");
 const siteController = require("../controllers/SiteController");
 const orderController = require("../controllers/OrderController");
 
-router.post('/api/signup', [verifySignUp.checkDuplicateUsernameOrEmail, verifySignUp.checkRolesExisted], siteController.signup);
+router.post('/signup', [verifySignUp.checkDuplicateUsernameOrEmail, verifySignUp.checkRolesExisted], siteController.signup);
 
-router.post('/api/signin', siteController.signin);
+router.post('/signin', siteController.signin);
 
-router.get('/api/all-products', siteController.getAllProducts);
+router.post('/signout', siteController.signOut);
 
-router.get('/api/product/:id', siteController.getProductById);
+router.get('/all-products', siteController.getAllProducts);
 
-router.get('/api/all-categories', siteController.getAllCategories);
+router.get('/product/:slug', siteController.getProductBySlug);
 
-router.get("/api/category/:id/product", siteController.getProductFilteredByCategory);
+router.get('/all-categories', siteController.getAllCategories);
 
-// router.post("/api/add-to-cart", siteController.addToCart);
+router.get("/category/:id/product", siteController.getProductFilteredByCategory);
 
-// router.get("/api/cart", siteController.getCart);
+// router.product("/add-to-cart", siteController.addToCart);
 
-router.post('/api/create-order', orderController.placeOrder);
+// router.get("/cart", siteController.getCart);
 
-router.post('/api/order-list', orderController.getOrderList);
+router.post('/create-order', orderController.placeOrder);
+
+// router.product('/order-list', orderController.getOrderList);
 
 module.exports = router;

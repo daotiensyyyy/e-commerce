@@ -1,0 +1,10 @@
+GET http://localhost:3000/api/admin/all-posts
+x-access-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxMzE3NTY2ZWZkNDA4MzUzNDIwNWU3YyIsImlhdCI6MTYzMTE2NTY0NiwiZXhwIjoxNjMxMjUyMDQ2fQ.A0rsC8Z9rOUJeB4bk9IcxMLGX77sw9Trjc-C-pHQ6M4
+###
+POST http://localhost:3000/api/signin
+Content-Type: application/json
+
+{
+    "username":"sydao1579@gmail.com",
+    "password":"sydao1579@"
+}

@@ -4,32 +4,35 @@ const router = express.Router();
 const { authJwt } = require("../middleware");
 const adminController = require("../controllers/AdminController");
 
-router.delete('/api/user/:id/delete', [authJwt.verifyToken, authJwt.isAdmin], adminController.delete);
+// router.delete('/user/:id/delete', [authJwt.verifyToken, authJwt.isAdmin], adminController.delete);
 
-router.put('/api/user/:id/edit', [authJwt.verifyToken, authJwt.isAdmin], adminController.editUserById);
+// router.put('/user/:id/edit', [authJwt.verifyToken, authJwt.isAdmin], adminController.editUserById);
 
-router.get('/api/user/:id', [authJwt.verifyToken, authJwt.isAdmin], adminController.getUserInfoById);
+// router.get('/user/:id', [authJwt.verifyToken, authJwt.isAdmin], adminController.getUserInfoById);
 
-router.get('/api/all-users', [authJwt.verifyToken, authJwt.isAdmin], adminController.getAllUsers);
+// router.get('/all-users', [authJwt.verifyToken, authJwt.isAdmin], adminController.getAllUsers);
 
-router.get('/api/all-products', [authJwt.verifyToken, authJwt.isAdmin], adminController.getAllProducts);
+// router.get('/all-products', [authJwt.verifyToken, authJwt.isAdmin], adminController.getAllProducts);
+router.get('/all-products', adminController.getAllProducts);
 
-router.get('/api/product/:id', [authJwt.verifyToken, authJwt.isAdmin], adminController.getProductById);
+router.get('/product/:id', adminController.getProductById);
 
-router.post('/api/create-product', [authJwt.verifyToken, authJwt.isAdmin], adminController.createProduct);
+router.post('/create-product', adminController.createProduct);
 
-router.put('/api/product/:id/edit', [authJwt.verifyToken, authJwt.isAdmin], adminController.editProductById);
+router.post('/create-category', adminController.createCategory);
 
-router.delete('/api/product/:id/delete', [authJwt.verifyToken, authJwt.isAdmin], adminController.deleteProductById);
+router.put('/product/:id/edit', adminController.editProductById);
 
-router.get('/api/trash/products', [authJwt.verifyToken, authJwt.isAdmin], adminController.getProductsDeleted);
+router.delete('/product/:id/delete', adminController.deleteProductById);
 
-router.patch('/api/trash/product/:id/restore', [authJwt.verifyToken, authJwt.isAdmin], adminController.restoreProductById);
+router.get('/trash/products', adminController.getProductsDeleted);
 
-// router.post('/api/create-category', [authJwt.verifyToken, authJwt.isAdmin], adminController.createCategory);
+router.patch('/trash/product/:id/restore', adminController.restoreProductById);
 
-router.post("/upload-file", adminController.uploadFile);
+// router.product('/api/create-category', adminController.createCategory);
 
-router.get("/files", adminController.getFilesList)
+// router.product("/upload-file", adminController.uploadFile);
+
+// router.get("/files", adminController.getFilesList)
 
 module.exports = router;

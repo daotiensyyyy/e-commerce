@@ -1,31 +1,31 @@
 const db = require("../models");
 const Order = db.order;
+const nodemailer = require("nodemailer");
+require('dotenv').config();
 
 class OrderController {
 
     //[POST] /api/create-order
     placeOrder = (req, res, next) => {
-        // console.log(req.body);
-        // res.json(req.body);
         if (!(Array.isArray(req.body.items) && req.body.items.length)) {
             res.send('No order items included');
         }
         const orderData = {
-            code: req.body.code,
+            // code: _id,
             customerName: req.body.customerName,
-            customerEmail: req.body.customerEmail,
             customerAddress: req.body.customerAddress,
             customerPhone: req.body.customerPhone,
-            // billingAddress: req.body.billingAddress,
-            shippingMethod: req.body.shippingMethod,
             paymentMethod: req.body.paymentMethod
         };
         orderData.items = req.body.items.map(item => {
             return {
                 productId: item.productId,
-                name: item.name,
+                name: item.product.name,
                 price: item.price,
-                qty: item.qty
+                qty: item.qty,
+                ice: item.ice,
+                sugar: item.sugar,
+                toppings: item.toppings,
             };
         });
         orderData.grandTotal = req.body.items.reduce((total, item) => {
@@ -36,30 +36,56 @@ class OrderController {
 
         order.save()
             .then(savedOrder => {
-                // const allProductPromises = savedOrder.items.map(item => {
-                //     return Product.get(item.productId).then(product => {
-                //       product.quantity = product.quantity - item.qty;
-                //       return product.save();
-                //     });
-                //   });
-                //   Promise.all(allProductPromises)
-                //     .then(data => {
-                //       return Cart.get(savedOrder.user);
-                //     })
-                //     .then(cart => {
-                //       cart.items = [];
-                //       return cart.save();
-                //     })
-                //     .then(data => {
-                //       res.json(savedOrder);
-                //     })
-                //     .catch(err => {
-                //       // console.log(err);
-                //       const error = new APIError(err.message, httpStatus.INTERNAL_SERVER_ERROR, true);
-                //       return next(error);
-                //     });
 
-                res.status(200).json(savedOrder);
+                let transporter = nodemailer.createTransport({
+                    host: 'smtp.gmail.com',
+                    port: 587,
+                    secure: false,
+                    auth: {
+                        user: process.env.GMAIL_USER,
+                        pass: process.env.GMAIL_PASSWORD,
+                    },
+                    tls: {
+                        rejectUnauthorized: false,
+                    }
+                });
+
+                let mailInfo = {
+                    from: "sydao1579@gmail.com", // sender address
+                    to: "sydao1579@gmail.com", // list of receivers
+                    subject: "ĐƠN HÀNG MỚI", // Subject line
+                    // text: savedOrder.customerAddress, // plain text body
+                    html:
+                        `
+                        <div>Tên khách hàng: ${savedOrder.customerName}</div>
+                        <div>Địa chỉ: ${savedOrder.customerAddress}</div>
+                        <div>Số điện thoại: ${savedOrder.customerPhone}</div>
+                        <div>
+                            Đơn hàng: <br>
+                            ${savedOrder.items.map(item => (
+                            `
+                                    <div>- Tên mặt hàng: ${item.name}</div>
+                                    <div>- Toppings thêm: ${item.toppings}</div>
+                                    <div>- Đá: ${item.ice}</div>
+                                    <div>- Đường: ${item.sugar}</div>
+                                    <div>- Giá: ${item.price}000đ - Số lượng: ${item.qty} = ${item.price * item.qty}000đ </div>
+                                    <hr/>
+                                `
+                        ))}
+                        </div>
+                        <div>Phương thức thanh toán: ${savedOrder.paymentMethod}</div>
+                        <div>Tổng tiền thanh toán: ${savedOrder.grandTotal}000đ </div>
+                    `,
+                }
+
+                transporter.sendMail(mailInfo, function (err, success) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        console.log("Email sent successfully");
+                        res.status(200).json(savedOrder);
+                    }
+                });
             })
             .catch(err => {
                 // console.log(err);
