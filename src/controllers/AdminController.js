@@ -12,6 +12,7 @@ class AdminController {
     //[GET] /api/admin/all-products
     getAllProducts = (req, res) => {
         const token = req.cookies.access_token;
+        console.log(token);
         try {
             const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
             Product.find({ deleted: false }).lean().populate("categories", "-__v")
