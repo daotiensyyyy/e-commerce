@@ -38,5 +38,4 @@ app.use('/uploads', express.static('./uploads'));
 
 
 route(app);
-// app.listen(process.env.PORT || 3000);
-app.listen();
+app.listen(process.env.PORT || 3000);
