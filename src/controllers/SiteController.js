@@ -92,7 +92,7 @@ class SiteController {
 
 
                 let token = jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN_SECRET, {
-                    expiresIn: '24h'
+                    expiresIn: '1h'
                 });
 
                 let authorities = [];
